@@ -45,3 +45,7 @@
 
 # Master key
 /config/master.key
+
+# Docker
+.dockerignore
+docker-compose.override.yml
