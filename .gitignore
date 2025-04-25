@@ -1,0 +1,47 @@
+.DS_Store
+
+# Logs
+/log/*
+!/log/.keep
+
+# Temporary files
+/tmp/*
+!/tmp/.keep
+
+# PIDs and sockets
+/pids/*
+/sockets/*
+
+# Byebug command history
+.byebug_history
+
+# Bundler config
+/.bundle
+
+# Node.js, Node modules, and Yarn
+/node_modules
+/yarn-error.log
+
+# Precompiled assets
+/public/assets
+/public/packs
+/public/packs-test
+/public/system
+/public/uploads
+
+# Coverage reports
+/coverage
+
+# Environment files
+.env
+.env.*
+
+# Database files
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# Spring files
+/spring/*.pid
+
+# Master key
+/config/master.key
