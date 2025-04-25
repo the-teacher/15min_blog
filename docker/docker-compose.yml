@@ -1,0 +1,13 @@
+name: ruby_app
+
+services:
+  ruby_app:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    tty: true
+    stdin_open: true
+    volumes:
+      - ../:/app
+    working_dir: /app
+    command: ["sleep", "infinity"]

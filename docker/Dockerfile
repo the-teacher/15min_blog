@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     nodejs \
     npm \
-    top \
+    procps \
     wget \
     telnet \
     && rm -rf /var/lib/apt/lists/*
