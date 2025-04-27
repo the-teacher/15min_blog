@@ -74,7 +74,9 @@ RUN tar -xvzf jpegarchive-${JPEGARCHIVE_VERSION}.tar.gz
 RUN cd jpeg-archive-${JPEGARCHIVE_VERSION} && \
     CFLAGS=-fcommon make install
 
-# STAGE | pngquant
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | PNGQUANT (OLD C version)
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM base_debian AS pngquant
 
 ARG PNGQUANT_VERSION
