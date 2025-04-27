@@ -4,27 +4,57 @@ FROM ubuntu:latest
 # Setting environment variables to prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Package descriptions:
+# build-essential - Compiler and build tools
+# git - Version control system
+# libssl-dev - SSL development libraries
+# zlib1g-dev - Compression library
+# libreadline-dev - Command line editing library
+# libyaml-dev - YAML parser and emitter
+# libsqlite3-dev - SQLite development files
+# libxml2-dev - XML parsing library
+# libxslt1-dev - XSLT processing library
+# libcurl4-openssl-dev - HTTP client library
+# libffi-dev - Foreign Function Interface library
+# software-properties-common - Manage software repositories
+# sqlite3 - SQLite database engine
+# curl - Command line tool for transferring data
+# wget - Internet file downloader
+# telnet - Telnet client
+# procps - System and process monitoring utilities
+# nodejs - JavaScript runtime
+# npm - Node.js package manager
+
 # Updating packages and installing necessary dependencies
 RUN apt-get update && apt-get install -y \
+    # Build essentials and development tools
     build-essential \
-    curl \
     git \
     libssl-dev \
     zlib1g-dev \
     libreadline-dev \
     libyaml-dev \
     libsqlite3-dev \
-    sqlite3 \
     libxml2-dev \
     libxslt1-dev \
     libcurl4-openssl-dev \
-    software-properties-common \
     libffi-dev \
-    nodejs \
-    npm \
-    procps \
+    software-properties-common \
+    \
+    # Database
+    sqlite3 \
+    \
+    # Network utilities
+    curl \
     wget \
     telnet \
+    \
+    # System monitoring
+    procps \
+    \
+    # JavaScript runtime
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Installing rbenv and ruby-build
