@@ -134,24 +134,66 @@ COPY --from=libjpeg      /usr/local/bin/jpegtran         /usr/bin
 COPY --from=libjpeg      /usr/local/lib/libjpeg.so.9     /usr/lib
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# PRECOMPILED IMG PROCESSORS
+# Install all required packages:
+#
+# Build tools:
+#   - build-essential: Essential compilation tools (gcc, make, etc.)
+#
+# Network tools:
+#   - wget: Tool for non-interactive file downloads
+#   - curl: Command line for transferring data with URL syntax
+#   - telnet: Telnet client for network debugging
+#
+# Shell:
+#   - bash: Bourne Again SHell
+#
+# Image processing tools:
+#   - gifsicle: Command-line tool for manipulating GIF images
+#   - jhead: Tool for manipulating JPEG EXIF data
+#   - optipng: PNG optimizer that recompresses images
+#   - pngcrush: PNG compression and optimization utility
+#   - jpegoptim: Utility to optimize JPEG files
+#
+# Image processing libraries:
+#   - libjpeg-dev: JPEG library development files
+#   - libpng-dev: PNG library development files
+#   - libtiff-dev: TIFF library development files
+#   - libgif-dev: GIF library development files
+#
+# System tools:
+#   - cron: Process scheduling daemon
+#   - vim: Improved vi text editor
+#   - procps: System and process monitoring utilities
+#   - tree: Displays directory structure in a tree-like format
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-RUN apt-get update && apt-get install --yes \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build tools
+    build-essential \
+    # Network tools
+    wget \
+    curl \
+    telnet \
+    # Shell
+    bash \
+    # Image processing tools
     gifsicle \
     jhead \
     optipng \
-    pngcrush
-
-# Install dependencies for WebP and other image processing
-RUN apt-get update && \
-    apt-get install -y \
-    build-essential \
-    wget curl \
-    bash \
-    jpegoptim libjpeg-dev libpng-dev libtiff-dev libgif-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    pngcrush \
+    jpegoptim \
+    # Image processing libraries
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libgif-dev \
+    # System tools
+    cron \
+    vim \
+    procps \
+    tree \
+    # Clean up
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 SHELL ["/bin/bash", "--login", "-c"]
 
@@ -184,15 +226,6 @@ RUN cd jpegoptim-${JPEGOPTIM_VERSION} && \
 RUN rm -rf jpegoptim-${JPEGOPTIM_VERSION}*
 
 WORKDIR /
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# COMMON
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-RUN apt-get update && apt-get install --yes \
-    telnet \
-    cron \
-    vim
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # IMG PROCESSORS TEST
