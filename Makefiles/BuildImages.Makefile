@@ -2,6 +2,9 @@
 DOCKERFILE = docker/_Base.Dockerfile
 IMAGE_NAME = iamteacher/blog_15min.base
 
+# Ruby version and OS version for the base image
+RUBY_VERSION = 3.4.3-bookworm
+
 # Build image for ARM64
 build-base-arm64:
 	docker build \
@@ -9,6 +12,7 @@ build-base-arm64:
 		-f $(DOCKERFILE) \
 		--build-arg BUILDPLATFORM="linux/arm64" \
 		--build-arg TARGETARCH="arm64" \
+		--build-arg RUBY_VERSION="$(RUBY_VERSION)" \
 		.
 
 # Build image for AMD64
@@ -18,6 +22,7 @@ build-base-amd64:
 		-f $(DOCKERFILE) \
 		--build-arg BUILDPLATFORM="linux/amd64" \
 		--build-arg TARGETARCH="amd64" \
+		--build-arg RUBY_VERSION="$(RUBY_VERSION)" \
 		.
 
 # Build images for all platforms

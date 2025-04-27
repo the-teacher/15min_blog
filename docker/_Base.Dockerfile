@@ -3,8 +3,11 @@
 # 
 # Image with the most common software
 
+# Ruby version to use
+ARG RUBY_VERSION=3.4.3-bookworm
+
 # STAGE | BASE DEBIAN
-FROM --platform=$BUILDPLATFORM ruby:3.4.3-bookworm AS base_debian
+FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION} AS base_debian
 RUN apt-get update && apt-get install -y build-essential cmake nasm bash findutils
 
 # STAGE | BASE RUST
@@ -75,13 +78,15 @@ RUN cd advancecomp-2.5 && \
     make install
 
 # STAGE | MAIN
-FROM --platform=$BUILDPLATFORM ruby:3.4.3-bookworm
+FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION}
 
 ARG TARGETARCH
 ARG BUILDPLATFORM
+ARG RUBY_VERSION
 
 RUN echo "$BUILDPLATFORM" > /BUILDPLATFORM
 RUN echo "$TARGETARCH" > /TARGETARCH
+RUN echo "$RUBY_VERSION" > /RUBY_VERSION
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # PRECOMPILED IMG PROCESSORS
