@@ -26,7 +26,9 @@ build-base-amd64:
 		.
 
 # Build images for all platforms
-build-base-all: build-base-arm64 build-base-amd64
+build-base-all:
+	make build-base-arm64
+	make build-base-amd64
 
 # Create manifest
 create-base-manifest:
