@@ -23,6 +23,8 @@ ARG PNGOUT_VERSION=20200115
 ARG ADVANCECOMP_VERSION=2.6
 # https://github.com/tjko/jpegoptim/releases
 ARG JPEGOPTIM_VERSION=1.5.5
+# https://developers.google.com/speed/webp/download
+ARG WEBP_VERSION=1.5.0
 
 # STAGE | BASE DEBIAN
 FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION} AS base_debian
@@ -111,6 +113,7 @@ ARG TARGETARCH
 ARG BUILDPLATFORM
 ARG RUBY_VERSION
 ARG JPEGOPTIM_VERSION
+ARG WEBP_VERSION
 
 RUN echo "$BUILDPLATFORM" > /BUILDPLATFORM
 RUN echo "$TARGETARCH" > /TARGETARCH
@@ -139,6 +142,31 @@ RUN apt-get update && apt-get install --yes \
     jhead \
     optipng \
     pngcrush
+
+# Install dependencies for WebP and other image processing
+RUN apt-get update && \
+    apt-get install -y \
+    build-essential \
+    wget curl \
+    bash \
+    jpegoptim libjpeg-dev libpng-dev libtiff-dev libgif-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+SHELL ["/bin/bash", "--login", "-c"]
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Install WEBP (dep: libjpeg-dev libpng-dev libtiff-dev libgif-dev)
+# https://developers.google.com/speed/webp/download
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+WORKDIR /tmp
+
+RUN wget -O libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz
+RUN tar -xvzf libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz
+RUN cp -R libwebp-${WEBP_VERSION}-linux-x86-64/bin/* /bin/
+
+RUN rm -rf libwebp-${WEBP_VERSION}*
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # JPEGOPTIM
