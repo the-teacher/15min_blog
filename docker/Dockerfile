@@ -69,6 +69,9 @@ RUN rbenv install 3.2.2 && \
     rbenv global 3.2.2 && \
     gem install bundler
 
+RUN gem update --system 3.6.8
+RUN gem install rails
+
 # Checking Ruby and Bundler versions
 RUN ruby -v && bundler -v
 
