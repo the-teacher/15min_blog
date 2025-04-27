@@ -6,6 +6,24 @@
 # Ruby version to use
 ARG RUBY_VERSION=3.4.3-bookworm
 
+# https://github.com/shssoichiro/oxipng/releases
+ARG OXIPNG_VERSION=9.1.5
+# https://www.ijg.org/files
+ARG JPEG_VERSION=9f
+# https://github.com/mozilla/mozjpeg/releases
+ARG MOZJPEG_VERSION=4.1.1
+# https://github.com/danielgtaylor/jpeg-archive/releases
+ARG JPEGARCHIVE_VERSION=2.2.0
+# https://pngquant.org/releases.html
+# https://raw.githubusercontent.com/kornelski/pngquant/main/CHANGELOG
+ARG PNGQUANT_VERSION=2.18.0
+# http://www.jonof.id.au/kenutils
+ARG PNGOUT_VERSION=20200115
+# https://github.com/amadvance/advancecomp/releases
+ARG ADVANCECOMP_VERSION=2.6
+# https://github.com/tjko/jpegoptim/releases
+ARG JPEGOPTIM_VERSION=1.5.5
+
 # STAGE | BASE DEBIAN
 FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION} AS base_debian
 RUN apt-get update && apt-get install -y build-essential cmake nasm bash findutils
@@ -19,9 +37,10 @@ RUN apt-get update && apt-get install -y build-essential
 # amd 64 ? <jemalloc>: (This is the expected behaviour if you are running under QEMU)
 FROM base_rust AS oxipng
 
-RUN wget -O oxipng-8.0.0.tar.gz https://github.com/shssoichiro/oxipng/archive/refs/tags/v8.0.0.tar.gz
-RUN tar -xvzf oxipng-8.0.0.tar.gz
-WORKDIR /oxipng-8.0.0
+ARG OXIPNG_VERSION
+RUN wget -O oxipng-${OXIPNG_VERSION}.tar.gz https://github.com/shssoichiro/oxipng/archive/refs/tags/v${OXIPNG_VERSION}.tar.gz
+RUN tar -xvzf oxipng-${OXIPNG_VERSION}.tar.gz
+WORKDIR /oxipng-${OXIPNG_VERSION}
 RUN cargo build --release; exit 0
 RUN cargo build --release
 RUN install -c target/release/oxipng /usr/local/bin
@@ -29,51 +48,57 @@ RUN install -c target/release/oxipng /usr/local/bin
 # STAGE | jpegtran
 FROM base_debian AS libjpeg
 
-RUN wget -O jpegsrc.v9e.tar.gz https://www.ijg.org/files/jpegsrc.v9e.tar.gz
-RUN tar -xvzf jpegsrc.v9e.tar.gz
-RUN cd jpeg-9e && \
+ARG JPEG_VERSION
+RUN wget -O jpegsrc.v${JPEG_VERSION}.tar.gz https://www.ijg.org/files/jpegsrc.v${JPEG_VERSION}.tar.gz
+RUN tar -xvzf jpegsrc.v${JPEG_VERSION}.tar.gz
+RUN cd jpeg-${JPEG_VERSION} && \
     ./configure && \
     make install
 
 # STAGE | LIB MOZ JPEG (common)
 FROM base_debian AS libmozjpeg
 
-RUN wget -O mozjpeg-4.1.1.tar.gz https://github.com/mozilla/mozjpeg/archive/v4.1.1.tar.gz
-RUN tar -xvzf mozjpeg-4.1.1.tar.gz
-RUN cd mozjpeg-4.1.1 && \
+ARG MOZJPEG_VERSION
+RUN wget -O mozjpeg-${MOZJPEG_VERSION}.tar.gz https://github.com/mozilla/mozjpeg/archive/v${MOZJPEG_VERSION}.tar.gz
+RUN tar -xvzf mozjpeg-${MOZJPEG_VERSION}.tar.gz
+RUN cd mozjpeg-${MOZJPEG_VERSION} && \
     cmake -DPNG_SUPPORTED=0 . && \
     make install
 
 # STAGE | jpeg-recompress
 FROM libmozjpeg AS jpegarchive
 
-RUN wget -O jpegarchive-2.2.0.tar.gz https://github.com/danielgtaylor/jpeg-archive/archive/v2.2.0.tar.gz
-RUN tar -xvzf jpegarchive-2.2.0.tar.gz
-RUN cd jpeg-archive-2.2.0 && \
+ARG JPEGARCHIVE_VERSION
+RUN wget -O jpegarchive-${JPEGARCHIVE_VERSION}.tar.gz https://github.com/danielgtaylor/jpeg-archive/archive/v${JPEGARCHIVE_VERSION}.tar.gz
+RUN tar -xvzf jpegarchive-${JPEGARCHIVE_VERSION}.tar.gz
+RUN cd jpeg-archive-${JPEGARCHIVE_VERSION} && \
     CFLAGS=-fcommon make install
 
 # STAGE | pngquant
 FROM base_debian AS pngquant
 
-RUN wget -O pngquant-2.18.0.tar.gz https://pngquant.org/pngquant-2.18.0-src.tar.gz
-RUN tar -xvzf pngquant-2.18.0.tar.gz
-RUN cd pngquant-2.18.0 && \
+ARG PNGQUANT_VERSION
+RUN wget -O pngquant-${PNGQUANT_VERSION}.tar.gz https://pngquant.org/pngquant-${PNGQUANT_VERSION}-src.tar.gz
+RUN tar -xvzf pngquant-${PNGQUANT_VERSION}.tar.gz
+RUN cd pngquant-${PNGQUANT_VERSION} && \
     make install
 
 # STAGE | pngout-static
 FROM base_debian AS pngout-static
 
-RUN wget -O pngout-20200115-linux-static.tar.gz http://www.jonof.id.au/files/kenutils/pngout-20200115-linux-static.tar.gz
-RUN tar -xvzf pngout-20200115-linux-static.tar.gz
-RUN cd pngout-20200115-linux-static && \
+ARG PNGOUT_VERSION
+RUN wget -O pngout-${PNGOUT_VERSION}-linux-static.tar.gz http://www.jonof.id.au/files/kenutils/pngout-${PNGOUT_VERSION}-linux-static.tar.gz
+RUN tar -xvzf pngout-${PNGOUT_VERSION}-linux-static.tar.gz
+RUN cd pngout-${PNGOUT_VERSION}-linux-static && \
     cp amd64/pngout-static /usr/local/bin/pngout
 
 # STAGE | advpng
 FROM base_debian AS advancecomp
 
-RUN wget -O advancecomp-2.5.tar.gz https://github.com/amadvance/advancecomp/releases/download/v2.5/advancecomp-2.5.tar.gz
-RUN tar -xvzf advancecomp-2.5.tar.gz
-RUN cd advancecomp-2.5 && \
+ARG ADVANCECOMP_VERSION
+RUN wget -O advancecomp-${ADVANCECOMP_VERSION}.tar.gz https://github.com/amadvance/advancecomp/releases/download/v${ADVANCECOMP_VERSION}/advancecomp-${ADVANCECOMP_VERSION}.tar.gz
+RUN tar -xvzf advancecomp-${ADVANCECOMP_VERSION}.tar.gz
+RUN cd advancecomp-${ADVANCECOMP_VERSION} && \
     ./configure && \
     make install
 
@@ -83,6 +108,7 @@ FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION}
 ARG TARGETARCH
 ARG BUILDPLATFORM
 ARG RUBY_VERSION
+ARG JPEGOPTIM_VERSION
 
 RUN echo "$BUILDPLATFORM" > /BUILDPLATFORM
 RUN echo "$TARGETARCH" > /TARGETARCH
@@ -118,14 +144,14 @@ RUN apt-get update && apt-get install --yes \
 
 WORKDIR /tmp
 
-RUN wget -O jpegoptim-1.5.1.tar.gz https://github.com/tjko/jpegoptim/archive/v1.5.1.tar.gz
-RUN tar -xvzf jpegoptim-1.5.1.tar.gz
+RUN wget -O jpegoptim-${JPEGOPTIM_VERSION}.tar.gz https://github.com/tjko/jpegoptim/archive/v${JPEGOPTIM_VERSION}.tar.gz
+RUN tar -xvzf jpegoptim-${JPEGOPTIM_VERSION}.tar.gz
 
-RUN cd jpegoptim-1.5.1 && \
+RUN cd jpegoptim-${JPEGOPTIM_VERSION} && \
     ./configure && \
     make install
 
-RUN rm -rf jpegoptim-1.5.1*
+RUN rm -rf jpegoptim-${JPEGOPTIM_VERSION}*
 
 WORKDIR /
 
