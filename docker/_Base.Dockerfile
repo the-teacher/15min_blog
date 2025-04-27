@@ -4,7 +4,7 @@
 # Image with the most common software
 
 # STAGE | BASE DEBIAN
-FROM --platform=$BUILDPLATFORM ruby:3.2 as base_debian
+FROM --platform=$BUILDPLATFORM ruby:3.4.3-bookworm as base_debian
 RUN apt-get update && apt-get install -y build-essential cmake nasm bash findutils
 
 # STAGE | BASE RUST
