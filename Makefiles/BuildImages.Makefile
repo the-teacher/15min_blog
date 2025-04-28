@@ -31,11 +31,16 @@ build-base-all:
 	make build-base-amd64
 
 # Check if images exist locally
+# Show image information
 check-images:
 	@echo "Checking if images exist locally..."
 	@docker image inspect $(IMAGE_NAME):arm64 >/dev/null 2>&1 || (echo "Error: Image $(IMAGE_NAME):arm64 not found. Run 'make build-base-arm64' first." && exit 1)
 	@docker image inspect $(IMAGE_NAME):amd64 >/dev/null 2>&1 || (echo "Error: Image $(IMAGE_NAME):amd64 not found. Run 'make build-base-amd64' first." && exit 1)
 	@echo "All required images exist."
+	@echo "Image $(IMAGE_NAME):arm64:"
+	@docker image inspect $(IMAGE_NAME):arm64 | grep -E '"Id":|"RepoTags":'
+	@echo "Image $(IMAGE_NAME):amd64:"
+	@docker image inspect $(IMAGE_NAME):amd64 | grep -E '"Id":|"RepoTags":'
 
 # Create manifest (local only)
 create-base-manifest:
@@ -51,7 +56,8 @@ push-base-images:
 	docker push $(IMAGE_NAME):amd64
 
 # Push manifest to Docker Hub
-push-base-manifest: push-base-images
+push-base-manifest:
+	make push-base-images
 	docker manifest push --purge $(IMAGE_NAME):latest
 
 # Complete workflow: build, push images, create manifest, and push manifest

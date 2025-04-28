@@ -25,6 +25,14 @@ ARG ADVANCECOMP_VERSION=2.6
 ARG JPEGOPTIM_VERSION=1.5.5
 # https://developers.google.com/speed/webp/download
 ARG WEBP_VERSION=1.5.0
+# https://github.com/ImageMagick/ImageMagick/releases
+ARG IMAGEMAGICK_VERSION=7.1.1-28
+# https://nodejs.org/en/download
+ARG NODE_VERSION=22.15.0
+# https://www.npmjs.com/package/npm
+ARG NPM_VERSION=11.3.0
+# https://github.com/nvm-sh/nvm/releases
+ARG NVM_VERSION=0.40.3
 
 # STAGE | BASE DEBIAN
 FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION} AS base_debian
@@ -106,6 +114,23 @@ RUN cd advancecomp-${ADVANCECOMP_VERSION} && \
     ./configure && \
     make install
 
+# STAGE | ImageMagick 7+
+FROM base_debian AS imagemagick
+
+ARG IMAGEMAGICK_VERSION
+RUN apt-get update && apt-get install -y \
+    libpng-dev libjpeg-dev libtiff-dev libwebp-dev libheif-dev libopenjp2-7-dev \
+    libx11-dev libxext-dev zlib1g-dev liblcms2-dev libfontconfig1-dev libfreetype6-dev \
+    libxml2-dev libltdl7-dev ghostscript
+
+RUN wget -O ImageMagick-${IMAGEMAGICK_VERSION}.tar.gz https://github.com/ImageMagick/ImageMagick/archive/${IMAGEMAGICK_VERSION}.tar.gz
+RUN tar -xvzf ImageMagick-${IMAGEMAGICK_VERSION}.tar.gz
+WORKDIR /ImageMagick-${IMAGEMAGICK_VERSION}
+RUN ./configure --with-modules --with-quantum-depth=16 --with-heic=yes --with-webp=yes
+RUN make -j$(nproc)
+RUN make install
+RUN ldconfig /usr/local/lib
+
 # STAGE | MAIN
 FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION}
 
@@ -114,6 +139,10 @@ ARG BUILDPLATFORM
 ARG RUBY_VERSION
 ARG JPEGOPTIM_VERSION
 ARG WEBP_VERSION
+ARG IMAGEMAGICK_VERSION
+ARG NODE_VERSION
+ARG NPM_VERSION
+ARG NVM_VERSION
 
 RUN echo "$BUILDPLATFORM" > /BUILDPLATFORM
 RUN echo "$TARGETARCH" > /TARGETARCH
@@ -132,6 +161,16 @@ COPY --from=jpegarchive  /usr/local/bin/jpeg-recompress  /usr/bin
 
 COPY --from=libjpeg      /usr/local/bin/jpegtran         /usr/bin
 COPY --from=libjpeg      /usr/local/lib/libjpeg.so.9     /usr/lib
+
+# Copy ImageMagick files
+COPY --from=imagemagick /usr/local/bin/magick /usr/bin/
+COPY --from=imagemagick /usr/local/bin/convert /usr/bin/
+COPY --from=imagemagick /usr/local/bin/identify /usr/bin/
+COPY --from=imagemagick /usr/local/bin/mogrify /usr/bin/
+COPY --from=imagemagick /usr/local/bin/composite /usr/bin/
+COPY --from=imagemagick /usr/local/lib/ /usr/local/lib/
+COPY --from=imagemagick /usr/local/include/ImageMagick-7/ /usr/local/include/ImageMagick-7/
+COPY --from=imagemagick /usr/local/etc/ImageMagick-7/ /usr/local/etc/ImageMagick-7/
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # Install all required packages:
@@ -186,14 +225,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libtiff-dev \
     libgif-dev \
+    # ImageMagick dependencies
+    libheif-dev \
+    libopenjp2-7-dev \
+    libx11-dev \
+    libxext-dev \
+    zlib1g-dev \
+    liblcms2-dev \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libxml2-dev \
+    libltdl7-dev \
+    ghostscript \
     # System tools
     cron \
     vim \
     procps \
     tree \
+    sudo \
     # Clean up
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure dynamic linker to find ImageMagick libraries
+RUN ldconfig /usr/local/lib
 
 SHELL ["/bin/bash", "--login", "-c"]
 
@@ -225,7 +280,45 @@ RUN cd jpegoptim-${JPEGOPTIM_VERSION} && \
 
 RUN rm -rf jpegoptim-${JPEGOPTIM_VERSION}*
 
-WORKDIR /
+# Verify ImageMagick installation
+RUN magick -version
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# NODE.JS
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+ENV NVM_DIR="/opt/.nvm"
+RUN mkdir -p /opt/.nvm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash
+RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm use ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && npm install -g npm@${NPM_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && npm install -g yarn
+
+# Add NVM binaries to PATH
+ENV PATH="/opt/.nvm/versions/node/v${NODE_VERSION}/bin:${PATH}"
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Rails User Setup
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# Create rails user and group with ID 1000
+RUN groupadd --system --gid 1000 rails && \
+    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
+
+# Add rails to sudo group and configure passwordless sudo
+# RUN usermod -aG sudo rails && \
+#     echo "rails ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/rails
+
+# Set ownership for Ruby and Node.js
+RUN chown -R rails:rails /usr/local/bundle
+RUN chown -R rails:rails /opt/.nvm
+
+# Create app directory and set ownership
+RUN mkdir -p /app && chown -R rails:rails /app
+
+# Set editor for rails credentials
+ENV EDITOR="vim"
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # IMG PROCESSORS TEST
@@ -233,3 +326,7 @@ WORKDIR /
 
 RUN mkdir -p /tmp/image_optim
 COPY docker/test/image_processors.sh /tmp/image_optim/image_processors.sh
+
+# Switch to rails user
+USER rails:rails
+WORKDIR /app
