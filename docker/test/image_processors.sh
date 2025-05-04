@@ -447,8 +447,7 @@ test_version "ImageMagick" "magick --version"
 #    image: test-start-kit.jpg
 #    original size: 196684 bytes
 #    compressed size: 23974 bytes
-#    compression: 
-# 88%
+#    compression: 88%
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # SVG Processor:
@@ -457,8 +456,7 @@ test_version "ImageMagick" "magick --version"
 #    image: test-ruby.svg
 #    original size: 8580 bytes
 #    compressed size: 6807 bytes
-#    compression: 
-# 21%
+#    compression: 21%
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # ImageMagick:
