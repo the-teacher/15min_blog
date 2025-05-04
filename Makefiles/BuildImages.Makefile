@@ -67,3 +67,19 @@ update-base-images:
 	make create-base-manifest
 	make push-base-manifest
 	@echo "All images built and pushed successfully!"
+
+# Enter shell of the latest ARM64 image
+shell-arm64:
+	docker run --rm -it \
+		--platform linux/arm64 \
+		-v $(PWD)/docker/test/image_processors.sh:/home/rails/image_processors.sh \
+		$(IMAGE_NAME):arm64 \
+		/bin/bash
+
+# Enter shell of the latest AMD64 image
+shell-amd64:
+	docker run --rm -it \
+		--platform linux/amd64 \
+		-v $(PWD)/docker/test/image_processors.sh:/home/rails/image_processors.sh \
+		$(IMAGE_NAME):amd64 \
+		/bin/bash

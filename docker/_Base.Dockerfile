@@ -3,6 +3,10 @@
 # 
 # Image with the most common software
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Software versions
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 # Ruby version to use
 ARG RUBY_VERSION=3.4.3-bookworm
 
@@ -34,19 +38,40 @@ ARG NPM_VERSION=11.3.0
 # https://github.com/nvm-sh/nvm/releases
 ARG NVM_VERSION=0.40.3
 
+# Expects versions not later than:
+#
+# jpeg-recompress - 2.2.0
+# jpegoptim - 1.5.5
+# jpegtran - 2.1.5 (build 20230203)
+# jhead - 3.06
+# advpng - 2.6
+# oxipng - 9.1.5
+# optipng - 0.7.7
+# pngquant - 3.0.3
+# pngcrush - 1.8.13
+# pngout - 20200115
+# gifsicle - 1.93
+# ImageMagick - 7.1.1-28
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | BASE DEBIAN
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION} AS base_debian
 RUN apt-get update && apt-get install -y build-essential cmake nasm bash findutils
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | BASE RUST
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM --platform=$BUILDPLATFORM rust:1 AS base_rust
 RUN apt-get update && apt-get install -y build-essential
 
-# STAGE | oxipng
-# amd 64 ? <jemalloc>: MADV_DONTNEED does not work (memset will be used instead)
-# amd 64 ? <jemalloc>: (This is the expected behaviour if you are running under QEMU)
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | OXIPNG
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM base_rust AS oxipng
 
+# amd 64 ? <jemalloc>: MADV_DONTNEED does not work (memset will be used instead)
+# amd 64 ? <jemalloc>: (This is the expected behaviour if you are running under QEMU)
 ARG OXIPNG_VERSION
 RUN wget -O oxipng-${OXIPNG_VERSION}.tar.gz https://github.com/shssoichiro/oxipng/archive/refs/tags/v${OXIPNG_VERSION}.tar.gz
 RUN tar -xvzf oxipng-${OXIPNG_VERSION}.tar.gz
@@ -55,7 +80,9 @@ RUN cargo build --release; exit 0
 RUN cargo build --release
 RUN install -c target/release/oxipng /usr/local/bin
 
-# STAGE | jpegtran
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | JPEGTRAN
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM base_debian AS libjpeg
 
 ARG JPEG_VERSION
@@ -65,7 +92,9 @@ RUN cd jpeg-${JPEG_VERSION} && \
     ./configure && \
     make install
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | LIB MOZ JPEG (common)
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM base_debian AS libmozjpeg
 
 ARG MOZJPEG_VERSION
@@ -75,7 +104,9 @@ RUN cd mozjpeg-${MOZJPEG_VERSION} && \
     cmake -DPNG_SUPPORTED=0 . && \
     make install
 
-# STAGE | jpeg-recompress
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | JPEG-RECOMPRESS
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM libmozjpeg AS jpegarchive
 
 ARG JPEGARCHIVE_VERSION
@@ -87,15 +118,33 @@ RUN cd jpeg-archive-${JPEGARCHIVE_VERSION} && \
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | PNGQUANT (OLD C version)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-FROM base_debian AS pngquant
+# FROM base_debian AS pngquant
+#
+# ARG PNGQUANT_VERSION
+# RUN wget -O pngquant-${PNGQUANT_VERSION}.tar.gz https://pngquant.org/pngquant-${PNGQUANT_VERSION}-src.tar.gz
+# RUN tar -xvzf pngquant-${PNGQUANT_VERSION}.tar.gz
+# RUN cd pngquant-${PNGQUANT_VERSION} && \
+#     make install
 
-ARG PNGQUANT_VERSION
-RUN wget -O pngquant-${PNGQUANT_VERSION}.tar.gz https://pngquant.org/pngquant-${PNGQUANT_VERSION}-src.tar.gz
-RUN tar -xvzf pngquant-${PNGQUANT_VERSION}.tar.gz
-RUN cd pngquant-${PNGQUANT_VERSION} && \
-    make install
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | PNGQUANT (NEW Rust version)
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+FROM base_rust AS pngquant
 
-# STAGE | pngout-static
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    zlib1g-dev
+
+# Clone and build pngquant
+RUN git clone --recursive https://github.com/kornelski/pngquant.git
+WORKDIR /pngquant
+RUN cargo build --release --features=lcms2
+RUN install -c target/release/pngquant /usr/local/bin
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | PNGOUT-STATIC
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM base_debian AS pngout-static
 
 ARG PNGOUT_VERSION
@@ -104,7 +153,9 @@ RUN tar -xvzf pngout-${PNGOUT_VERSION}-linux-static.tar.gz
 RUN cd pngout-${PNGOUT_VERSION}-linux-static && \
     cp amd64/pngout-static /usr/local/bin/pngout
 
-# STAGE | advpng
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | ADVPNG
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM base_debian AS advancecomp
 
 ARG ADVANCECOMP_VERSION
@@ -114,7 +165,9 @@ RUN cd advancecomp-${ADVANCECOMP_VERSION} && \
     ./configure && \
     make install
 
-# STAGE | ImageMagick 7+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | IMAGEMAGICK 7+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM base_debian AS imagemagick
 
 ARG IMAGEMAGICK_VERSION
@@ -131,7 +184,9 @@ RUN make -j$(nproc)
 RUN make install
 RUN ldconfig /usr/local/lib
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | MAIN
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION}
 
 ARG TARGETARCH
@@ -326,6 +381,10 @@ ENV EDITOR="vim"
 
 RUN mkdir -p /tmp/image_optim
 COPY docker/test/image_processors.sh /tmp/image_optim/image_processors.sh
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# FINAL CONFIGURATION
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 # Switch to rails user
 USER rails:rails
