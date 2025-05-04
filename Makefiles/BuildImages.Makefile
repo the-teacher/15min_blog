@@ -42,6 +42,13 @@ check-images:
 	@echo "Image $(IMAGE_NAME):amd64:"
 	@docker image inspect $(IMAGE_NAME):amd64 | grep -E '"Id":|"RepoTags":'
 
+# Show image sizes
+image-sizes:
+	@echo "Checking image sizes..."
+	@echo "=============================================================="
+	@docker images --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}" | grep -E "$(IMAGE_NAME):(arm64|amd64)"
+	@echo "=============================================================="
+
 # Create manifest (local only)
 create-base-manifest:
 	make check-images
@@ -68,7 +75,7 @@ update-base-images:
 	make push-base-manifest
 	@echo "All images built and pushed successfully!"
 
-# Enter shell of the latest ARM64 image
+# Enter shell of the latest ARM64 image as rails user
 shell-arm64:
 	docker run --rm -it \
 		--platform linux/arm64 \
@@ -76,10 +83,28 @@ shell-arm64:
 		$(IMAGE_NAME):arm64 \
 		/bin/bash
 
-# Enter shell of the latest AMD64 image
+# Enter shell of the latest AMD64 image as rails user
 shell-amd64:
 	docker run --rm -it \
 		--platform linux/amd64 \
 		-v $(PWD)/docker/test/image_processors.sh:/home/rails/image_processors.sh \
+		$(IMAGE_NAME):amd64 \
+		/bin/bash
+
+# Enter shell of the latest ARM64 image as root user
+shell-arm64-root:
+	docker run --rm -it \
+		--platform linux/arm64 \
+		-v $(PWD)/docker/test/image_processors.sh:/root/image_processors.sh \
+		--user root \
+		$(IMAGE_NAME):arm64 \
+		/bin/bash
+
+# Enter shell of the latest AMD64 image as root user
+shell-amd64-root:
+	docker run --rm -it \
+		--platform linux/amd64 \
+		-v $(PWD)/docker/test/image_processors.sh:/root/image_processors.sh \
+		--user root \
 		$(IMAGE_NAME):amd64 \
 		/bin/bash
