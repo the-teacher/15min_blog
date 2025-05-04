@@ -108,3 +108,19 @@ shell-amd64-root:
 		--user root \
 		$(IMAGE_NAME):amd64 \
 		/bin/bash
+
+# Clean all docker images related to this project
+clean-images:
+	@echo "Cleaning all project images..."
+	@echo "Removing tagged images..."
+	-docker rmi $(IMAGE_NAME):arm64 $(IMAGE_NAME):amd64 $(IMAGE_NAME):latest
+	@echo "Removing all dangling images (intermediate build layers)..."
+	-docker image prune -af
+	@echo "Images cleanup completed!"
+
+# Show all docker images
+show-all-images:
+	@echo "All Docker images:"
+	@echo "=============================================================="
+	@docker images
+	@echo "=============================================================="
