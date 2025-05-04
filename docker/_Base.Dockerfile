@@ -7,6 +7,11 @@
 # Software versions
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+# SEE: image_optim && image_optim_pack
+# https://github.com/toy/image_optim
+# https://github.com/toy/image_optim_pack/blob/main/Makefile
+# https://github.com/toy/image_optim_pack/blob/main/Dockerfile
+
 # Ruby version to use
 ARG RUBY_VERSION=3.4.3-bookworm
 
