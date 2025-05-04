@@ -45,6 +45,8 @@ ARG NVM_VERSION=0.40.3
 
 # Expects versions not later than:
 #
+# svgo - 3.3.2
+# cwebp - 1.5.0
 # jpeg-recompress - 2.2.0
 # jpegoptim - 1.5.5
 # jpegtran - 2.1.5 (build 20230203)

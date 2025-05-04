@@ -141,6 +141,14 @@ print_stats() {
     # GIF Processor
     subsection_header "GIF Processor:" "green"
     print_processor_stats "gifsicle"
+
+    # WebP Processor
+    subsection_header "WebP Processor:" "green"
+    print_processor_stats "cwebp"
+
+    # SVG Processor
+    subsection_header "SVG Processor:" "green"
+    print_processor_stats "svgo"
     
     # ImageMagick
     subsection_header "ImageMagick:" "green"
@@ -214,9 +222,11 @@ wget -O test-start-kit.jpg https://raw.githubusercontent.com/the-teacher/rails7-
 wget -O test-thinking-sphinx.png https://raw.githubusercontent.com/the-teacher/rails7-startkit/master/Rails7StartKit/assets/images/thinking-sphinx.png
 # size: 4888813
 wget -O test-cat.gif https://media.tenor.com/yLjbMCoTu3UAAAAd/cat-pounce.gif
+# Download Ruby SVG image
+wget -O test-ruby.svg https://www.svgrepo.com/show/452095/ruby.svg
 
 echo "Original file sizes:"
-ls -lh test-*.{jpg,png,gif}
+ls -lh test-*.{jpg,png,gif,svg}
 
 # Test JPEG processors
 subsection_header "Testing JPEG processors:" "green"
@@ -282,6 +292,22 @@ test_processor "gifsicle" \
               "cat.gif" \
               "gifsicle -O3 --colors 256 --lossy=30 cat.gif -o cat.gif"
 
+# Test WebP processor
+subsection_header "Testing WebP processor:" "green"
+
+test_processor "cwebp" \
+              "test-start-kit.jpg" \
+              "start-kit.webp" \
+              "cwebp -q 80 start-kit.jpg -o start-kit.webp"
+
+# Test SVG processor
+subsection_header "Testing SVG processor:" "green"
+
+test_processor "svgo" \
+              "test-ruby.svg" \
+              "ruby.svg" \
+              "svgo -i ruby.svg -o ruby.svg --multipass"
+
 # Test ImageMagick
 subsection_header "Testing ImageMagick:" "green"
 
@@ -312,7 +338,7 @@ section_header "Installed Image Processors Versions:" "orange"
 subsection_header "JPEG Processors:" "green"
 test_version "jpeg-recompress" "jpeg-recompress --version"
 test_version "jpegoptim" "jpegoptim --version"
-test_version "jpegtran" "jpegtran --version"
+test_version "jpegtran" "jpegtran -V 0"
 test_version "jhead" "jhead -V"
 
 subsection_header "PNG Processors:" "green"
@@ -325,6 +351,12 @@ test_version "pngout" "pngout --version"
 
 subsection_header "GIF Processor:" "green"
 test_version "gifsicle" "gifsicle --version"
+
+subsection_header "WebP Processor:" "green"
+test_version "cwebp" "cwebp -version"
+
+subsection_header "SVG Processor:" "green"
+test_version "svgo" "svgo --version"
 
 subsection_header "ImageMagick:" "green"
 test_version "ImageMagick" "magick --version"
@@ -407,6 +439,26 @@ test_version "ImageMagick" "magick --version"
 #    original size: 4888813 bytes
 #    compressed size: 4888813 bytes
 #    compression: 22%
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# WebP Processor:
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# cwebp:
+#    image: test-start-kit.jpg
+#    original size: 196684 bytes
+#    compressed size: 23974 bytes
+#    compression: 
+# 88%
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# SVG Processor:
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# svgo:
+#    image: test-ruby.svg
+#    original size: 8580 bytes
+#    compressed size: 6807 bytes
+#    compression: 
+# 21%
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # ImageMagick:
