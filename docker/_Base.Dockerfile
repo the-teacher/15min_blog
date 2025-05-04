@@ -353,7 +353,9 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/instal
 RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm use ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && npm install -g npm@${NPM_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && npm install -g yarn
+RUN . "$NVM_DIR/nvm.sh" && npm install -g yarn@latest
+RUN . "$NVM_DIR/nvm.sh" && npm install -g svgo
+
 
 # Add NVM binaries to PATH
 ENV PATH="/opt/.nvm/versions/node/v${NODE_VERSION}/bin:${PATH}"
