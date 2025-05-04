@@ -379,8 +379,10 @@ ENV EDITOR="vim"
 # IMG PROCESSORS TEST
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-RUN mkdir -p /tmp/image_optim
-COPY docker/test/image_processors.sh /tmp/image_optim/image_processors.sh
+# Copy image processor test script directly to root and rails home directories
+COPY docker/test/image_processors.sh /root/image_processors.sh
+COPY docker/test/image_processors.sh /home/rails/image_processors.sh
+RUN chown rails:rails /home/rails/image_processors.sh
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # FINAL CONFIGURATION

@@ -99,6 +99,72 @@ test_result() {
     fi
 }
 
+# Statistics structure
+declare -A STATS=()
+
+# Add test result to statistics
+# Usage: add_stats "processor" "image" "original_size" "compressed_size"
+add_stats() {
+    local processor="$1"
+    local image="$2"
+    local original="$3"
+    local compressed="$4"
+    local ratio=$(calculate_compression_percentage "$original" "$compressed")
+    
+    STATS["${processor}_image"]="$image"
+    STATS["${processor}_original"]="$original"
+    STATS["${processor}_compressed"]="$compressed"
+    STATS["${processor}_ratio"]="$ratio"
+}
+
+# Print statistics
+# Usage: print_stats
+print_stats() {
+    section_header "Compression Statistics:" "orange"
+    
+    # JPEG Processors
+    subsection_header "JPEG Processors:" "green"
+    print_processor_stats "jpeg-recompress"
+    print_processor_stats "jpegoptim"
+    print_processor_stats "jpegtran"
+    print_processor_stats "jhead"
+    
+    # PNG Processors
+    subsection_header "PNG Processors:" "green"
+    print_processor_stats "advpng"
+    print_processor_stats "oxipng"
+    print_processor_stats "optipng"
+    print_processor_stats "pngquant"
+    print_processor_stats "pngcrush"
+    print_processor_stats "pngout"
+    
+    # GIF Processor
+    subsection_header "GIF Processor:" "green"
+    print_processor_stats "gifsicle"
+    
+    # ImageMagick
+    subsection_header "ImageMagick:" "green"
+    print_processor_stats "ImageMagick convert"
+}
+
+# Print single processor statistics
+# Usage: print_processor_stats "processor"
+print_processor_stats() {
+    local processor="$1"
+    local image="${STATS[${processor}_image]}"
+    local original="${STATS[${processor}_original]}"
+    local compressed="${STATS[${processor}_compressed]}"
+    local ratio="${STATS[${processor}_ratio]}"
+    
+    color_log "$processor:" "blue"
+    color_log "   image: $image" "default"
+    color_log "   original size: $original bytes" "default"
+    color_log "   compressed size: $compressed bytes" "default"
+    color_log "   compression: " "default"
+    color_log "${ratio}%" "red"
+    newline
+}
+
 # Test image processor
 # Usage: test_processor "processor_name" "input_file" "output_file" "command"
 test_processor() {
@@ -106,7 +172,7 @@ test_processor() {
     local input_file="$2"
     local output_file="$3"
     local command="$4"
-
+    
     test_message "$processor"
     cp "$input_file" "$output_file"
     original_size=$(stat -c%s "$output_file")
@@ -114,6 +180,9 @@ test_processor() {
     eval "$command"
     compressed_size=$(stat -c%s "$output_file")
     test_result "Compressed size: $compressed_size bytes" "$original_size" "$compressed_size"
+    
+    # Add to statistics
+    add_stats "$processor" "$(basename "$input_file")" "$original_size" "$compressed_size"
 }
 
 # Test package version
@@ -170,7 +239,7 @@ test_processor "jpegtran" \
 test_processor "jhead" \
               "test-start-kit.jpg" \
               "start-kit.jpg" \
-              "jhead -purejpg start-kit.jpg"
+              "jhead -purejpg -di -dt -dx start-kit.jpg"
 
 # Test PNG processors
 subsection_header "Testing PNG processors:" "green"
@@ -211,7 +280,7 @@ subsection_header "Testing GIF processor:" "green"
 test_processor "gifsicle" \
               "test-cat.gif" \
               "cat.gif" \
-              "gifsicle -I cat.gif"
+              "gifsicle -O3 --colors 256 --lossy=30 cat.gif -o cat.gif"
 
 # Test ImageMagick
 subsection_header "Testing ImageMagick:" "green"
@@ -224,6 +293,9 @@ test_processor "ImageMagick convert" \
 # Final results
 section_header "Final Results:" "orange"
 ls -lh "${TEST_DIR}"
+
+# Print statistics
+print_stats
 
 # Cleanup
 color_log "Cleaning up..." "blue"
@@ -256,3 +328,91 @@ test_version "gifsicle" "gifsicle --version"
 
 subsection_header "ImageMagick:" "green"
 test_version "ImageMagick" "magick --version"
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Compression Statistics:
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# JPEG Processors:
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# jpeg-recompress:
+#    image: test-start-kit.jpg
+#    original size: 196684 bytes
+#    compressed size: 58910 bytes
+#    compression: 71%
+
+# jpegoptim:
+#    image: test-start-kit.jpg
+#    original size: 196684 bytes
+#    compressed size: 180158 bytes
+#    compression: 9%
+
+# jpegtran:
+#    image: test-start-kit.jpg
+#    original size: 196684 bytes
+#    compressed size: 180176 bytes
+#    compression: 9%
+
+# jhead:
+#    image: test-start-kit.jpg
+#    original size: 196684 bytes
+#    compressed size: 196684 bytes
+#    compression: 0%
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# PNG Processors:
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# advpng:
+#    image: test-thinking-sphinx.png
+#    original size: 124033 bytes
+#    compressed size: 46171 bytes
+#    compression: 63%
+
+# oxipng:
+#    image: test-thinking-sphinx.png
+#    original size: 124033 bytes
+#    compressed size: 43141 bytes
+#    compression: 66%
+
+# optipng:
+#    image: test-thinking-sphinx.png
+#    original size: 124033 bytes
+#    compressed size: 51602 bytes
+#    compression: 59%
+
+# pngquant:
+#    image: test-thinking-sphinx.png
+#    original size: 124033 bytes
+#    compressed size: 21670 bytes
+#    compression: 83%
+
+# pngcrush:
+#    image: test-thinking-sphinx.png
+#    original size: 124033 bytes
+#    compressed size: 52084 bytes
+#    compression: 59%
+
+# pngout:
+#    image: test-thinking-sphinx.png
+#    original size: 124033 bytes
+#    compressed size: 100777 bytes
+#    compression: 19%
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# GIF Processor:
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# gifsicle:
+#    image: test-cat.gif
+#    original size: 4888813 bytes
+#    compressed size: 4888813 bytes
+#    compression: 22%
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# ImageMagick:
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# ImageMagick convert:
+#    image: test-start-kit.jpg
+#    original size: 196684 bytes
+#    compressed size: 58563 bytes
+#    compression: 71%
