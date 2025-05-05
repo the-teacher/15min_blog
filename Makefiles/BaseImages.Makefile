@@ -76,7 +76,7 @@ update-base-images:
 	@echo "All images built and pushed successfully!"
 
 # Enter shell of the latest ARM64 image as rails user
-shell-arm64:
+shell-base-arm64:
 	docker run --rm -it \
 		--platform linux/arm64 \
 		-v $(PWD)/docker/test/image_processors.sh:/home/rails/image_processors.sh \
@@ -84,7 +84,7 @@ shell-arm64:
 		/bin/bash
 
 # Enter shell of the latest AMD64 image as rails user
-shell-amd64:
+shell-base-amd64:
 	docker run --rm -it \
 		--platform linux/amd64 \
 		-v $(PWD)/docker/test/image_processors.sh:/home/rails/image_processors.sh \
@@ -92,7 +92,7 @@ shell-amd64:
 		/bin/bash
 
 # Enter shell of the latest ARM64 image as root user
-shell-arm64-root:
+shell-base-arm64-root:
 	docker run --rm -it \
 		--platform linux/arm64 \
 		-v $(PWD)/docker/test/image_processors.sh:/root/image_processors.sh \
@@ -101,7 +101,7 @@ shell-arm64-root:
 		/bin/bash
 
 # Enter shell of the latest AMD64 image as root user
-shell-amd64-root:
+shell-base-amd64-root:
 	docker run --rm -it \
 		--platform linux/amd64 \
 		-v $(PWD)/docker/test/image_processors.sh:/root/image_processors.sh \
@@ -110,13 +110,13 @@ shell-amd64-root:
 		/bin/bash
 
 # Clean all docker images related to this project
-clean-images:
-	@echo "Cleaning all project images..."
+clean-base-images:
+	@echo "Cleaning all base images..."
 	@echo "Removing tagged images..."
 	-docker rmi $(IMAGE_NAME):arm64 $(IMAGE_NAME):amd64 $(IMAGE_NAME):latest
 	@echo "Removing all dangling images (intermediate build layers)..."
 	-docker image prune -af
-	@echo "Images cleanup completed!"
+	@echo "Base images cleanup completed!"
 
 # Show all docker images
 show-all-images:
