@@ -1,4 +1,5 @@
 include Makefiles/BaseImages.Makefile
+include Makefiles/MainImages.Makefile
 
 # Main help command
 help:

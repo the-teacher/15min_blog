@@ -124,6 +124,3 @@ show-all-images:
 	@echo "=============================================================="
 	@docker images
 	@echo "=============================================================="
-
-# Include MainImages.Makefile for main image related targets
-include Makefiles/MainImages.Makefile
