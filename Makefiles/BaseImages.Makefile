@@ -79,7 +79,6 @@ update-base-images:
 shell-base-arm64:
 	docker run --rm -it \
 		--platform linux/arm64 \
-		-v $(PWD)/docker/test/image_processors.sh:/home/rails/image_processors.sh \
 		$(IMAGE_NAME):arm64 \
 		/bin/bash
 
@@ -87,7 +86,6 @@ shell-base-arm64:
 shell-base-amd64:
 	docker run --rm -it \
 		--platform linux/amd64 \
-		-v $(PWD)/docker/test/image_processors.sh:/home/rails/image_processors.sh \
 		$(IMAGE_NAME):amd64 \
 		/bin/bash
 
