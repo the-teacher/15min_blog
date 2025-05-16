@@ -268,6 +268,37 @@ RUN make
 RUN cp pngcrush /usr/local/bin/
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | JPEGOPTIM
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+FROM base_debian AS jpegoptim
+
+ARG JPEGOPTIM_VERSION
+
+RUN apt-get update && apt-get install -y \
+    make \
+    gcc \
+    libjpeg-dev
+
+RUN wget -O jpegoptim-${JPEGOPTIM_VERSION}.tar.gz https://github.com/tjko/jpegoptim/archive/v${JPEGOPTIM_VERSION}.tar.gz
+RUN tar -xvzf jpegoptim-${JPEGOPTIM_VERSION}.tar.gz
+WORKDIR /jpegoptim-${JPEGOPTIM_VERSION}
+RUN ./configure && make install
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | WEBP
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+FROM base_debian AS webp
+
+ARG WEBP_VERSION
+
+RUN apt-get update && apt-get install -y \
+    wget
+
+RUN wget -O libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz
+RUN tar -xvzf libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz
+RUN cp -R libwebp-${WEBP_VERSION}-linux-x86-64/bin/* /usr/local/bin/
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | MAIN
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 FROM --platform=$BUILDPLATFORM ruby:${RUBY_VERSION}
@@ -298,6 +329,12 @@ COPY --from=gifsicle      /usr/local/bin/gifsicle        /usr/bin
 COPY --from=jhead         /usr/local/bin/jhead           /usr/bin
 COPY --from=optipng       /usr/local/bin/optipng         /usr/bin
 COPY --from=pngcrush      /usr/local/bin/pngcrush        /usr/bin
+COPY --from=jpegoptim     /usr/local/bin/jpegoptim       /usr/bin
+COPY --from=webp          /usr/local/bin/cwebp           /usr/bin
+COPY --from=webp          /usr/local/bin/dwebp           /usr/bin
+COPY --from=webp          /usr/local/bin/gif2webp        /usr/bin
+COPY --from=webp          /usr/local/bin/webpmux         /usr/bin
+COPY --from=webp          /usr/local/bin/webpinfo        /usr/bin
 
 COPY --from=jpegarchive  /usr/local/bin/jpeg-recompress  /usr/bin
 
@@ -370,24 +407,6 @@ RUN tar -xvzf libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz
 RUN cp -R libwebp-${WEBP_VERSION}-linux-x86-64/bin/* /bin/
 
 RUN rm -rf libwebp-${WEBP_VERSION}*
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# JPEGOPTIM
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-WORKDIR /tmp
-
-RUN wget -O jpegoptim-${JPEGOPTIM_VERSION}.tar.gz https://github.com/tjko/jpegoptim/archive/v${JPEGOPTIM_VERSION}.tar.gz
-RUN tar -xvzf jpegoptim-${JPEGOPTIM_VERSION}.tar.gz
-
-RUN cd jpegoptim-${JPEGOPTIM_VERSION} && \
-    ./configure && \
-    make install
-
-RUN rm -rf jpegoptim-${JPEGOPTIM_VERSION}*
-
-# Verify ImageMagick installation
-RUN magick -version
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # NODE.JS
