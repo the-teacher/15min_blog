@@ -393,19 +393,6 @@ RUN ldconfig /usr/local/lib
 SHELL ["/bin/bash", "--login", "-c"]
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Install WEBP (dep: libjpeg-dev libpng-dev libtiff-dev libgif-dev)
-# https://developers.google.com/speed/webp/download
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-WORKDIR /tmp
-
-RUN wget -O libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz
-RUN tar -xvzf libwebp-${WEBP_VERSION}-linux-x86-64.tar.gz
-RUN cp -R libwebp-${WEBP_VERSION}-linux-x86-64/bin/* /bin/
-
-RUN rm -rf libwebp-${WEBP_VERSION}*
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # NODE.JS
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
