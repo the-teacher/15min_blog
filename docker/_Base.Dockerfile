@@ -23,9 +23,11 @@ ARG JPEG_VERSION=9f
 ARG MOZJPEG_VERSION=4.1.1
 # https://github.com/danielgtaylor/jpeg-archive/releases
 ARG JPEGARCHIVE_VERSION=2.2.0
+
 # https://pngquant.org/releases.html
 # https://raw.githubusercontent.com/kornelski/pngquant/main/CHANGELOG
-ARG PNGQUANT_VERSION=2.18.0
+# ARG PNGQUANT_VERSION=2.18.0
+
 # http://www.jonof.id.au/kenutils
 ARG PNGOUT_VERSION=20200115
 # https://github.com/amadvance/advancecomp/releases
@@ -42,6 +44,14 @@ ARG NODE_VERSION=22.15.0
 ARG NPM_VERSION=11.3.0
 # https://github.com/nvm-sh/nvm/releases
 ARG NVM_VERSION=0.40.3
+# https://www.lcdf.org/gifsicle/
+ARG GIFSICLE_VERSION=1.96
+# https://www.sentex.net/~mwandel/jhead/
+ARG JHEAD_VERSION=3.04
+# https://optipng.sourceforge.net/
+ARG OPTIPNG_VERSION=0.7.8
+# https://pmt.sourceforge.net/pngcrush/
+ARG PNGCRUSH_VERSION=1.8.13
 
 # Expects versions not later than:
 #
@@ -80,6 +90,7 @@ FROM base_rust AS oxipng
 # amd 64 ? <jemalloc>: MADV_DONTNEED does not work (memset will be used instead)
 # amd 64 ? <jemalloc>: (This is the expected behaviour if you are running under QEMU)
 ARG OXIPNG_VERSION
+
 RUN wget -O oxipng-${OXIPNG_VERSION}.tar.gz https://github.com/shssoichiro/oxipng/archive/refs/tags/v${OXIPNG_VERSION}.tar.gz
 RUN tar -xvzf oxipng-${OXIPNG_VERSION}.tar.gz
 WORKDIR /oxipng-${OXIPNG_VERSION}
@@ -93,6 +104,7 @@ RUN install -c target/release/oxipng /usr/local/bin
 FROM base_debian AS libjpeg
 
 ARG JPEG_VERSION
+
 RUN wget -O jpegsrc.v${JPEG_VERSION}.tar.gz https://www.ijg.org/files/jpegsrc.v${JPEG_VERSION}.tar.gz
 RUN tar -xvzf jpegsrc.v${JPEG_VERSION}.tar.gz
 RUN cd jpeg-${JPEG_VERSION} && \
@@ -105,6 +117,7 @@ RUN cd jpeg-${JPEG_VERSION} && \
 FROM base_debian AS libmozjpeg
 
 ARG MOZJPEG_VERSION
+
 RUN wget -O mozjpeg-${MOZJPEG_VERSION}.tar.gz https://github.com/mozilla/mozjpeg/archive/v${MOZJPEG_VERSION}.tar.gz
 RUN tar -xvzf mozjpeg-${MOZJPEG_VERSION}.tar.gz
 RUN cd mozjpeg-${MOZJPEG_VERSION} && \
@@ -117,6 +130,7 @@ RUN cd mozjpeg-${MOZJPEG_VERSION} && \
 FROM libmozjpeg AS jpegarchive
 
 ARG JPEGARCHIVE_VERSION
+
 RUN wget -O jpegarchive-${JPEGARCHIVE_VERSION}.tar.gz https://github.com/danielgtaylor/jpeg-archive/archive/v${JPEGARCHIVE_VERSION}.tar.gz
 RUN tar -xvzf jpegarchive-${JPEGARCHIVE_VERSION}.tar.gz
 RUN cd jpeg-archive-${JPEGARCHIVE_VERSION} && \
@@ -155,6 +169,7 @@ RUN install -c target/release/pngquant /usr/local/bin
 FROM base_debian AS pngout-static
 
 ARG PNGOUT_VERSION
+
 RUN wget -O pngout-${PNGOUT_VERSION}-linux-static.tar.gz http://www.jonof.id.au/files/kenutils/pngout-${PNGOUT_VERSION}-linux-static.tar.gz
 RUN tar -xvzf pngout-${PNGOUT_VERSION}-linux-static.tar.gz
 RUN cd pngout-${PNGOUT_VERSION}-linux-static && \
@@ -166,6 +181,7 @@ RUN cd pngout-${PNGOUT_VERSION}-linux-static && \
 FROM base_debian AS advancecomp
 
 ARG ADVANCECOMP_VERSION
+
 RUN wget -O advancecomp-${ADVANCECOMP_VERSION}.tar.gz https://github.com/amadvance/advancecomp/releases/download/v${ADVANCECOMP_VERSION}/advancecomp-${ADVANCECOMP_VERSION}.tar.gz
 RUN tar -xvzf advancecomp-${ADVANCECOMP_VERSION}.tar.gz
 RUN cd advancecomp-${ADVANCECOMP_VERSION} && \
@@ -178,6 +194,7 @@ RUN cd advancecomp-${ADVANCECOMP_VERSION} && \
 FROM base_debian AS imagemagick
 
 ARG IMAGEMAGICK_VERSION
+
 RUN apt-get update && apt-get install -y \
     libpng-dev libjpeg-dev libtiff-dev libwebp-dev libheif-dev libopenjp2-7-dev \
     libx11-dev libxext-dev zlib1g-dev liblcms2-dev libfontconfig1-dev libfreetype6-dev \
@@ -190,6 +207,80 @@ RUN ./configure --with-modules --with-quantum-depth=16 --with-heic=yes --with-we
 RUN make -j$(nproc)
 RUN make install
 RUN ldconfig /usr/local/lib
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | GIFSICLE
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+FROM base_debian AS gifsicle
+
+ARG GIFSICLE_VERSION
+
+RUN apt-get update && apt-get install -y \
+    autoconf \
+    automake \
+    libtool \
+    make \
+    gcc
+
+RUN wget -O gifsicle-${GIFSICLE_VERSION}.tar.gz https://www.lcdf.org/gifsicle/gifsicle-${GIFSICLE_VERSION}.tar.gz
+RUN tar -xvzf gifsicle-${GIFSICLE_VERSION}.tar.gz
+WORKDIR /gifsicle-${GIFSICLE_VERSION}
+RUN ./configure && make install
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | JHEAD
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+FROM base_debian AS jhead
+
+ARG JHEAD_VERSION
+
+RUN apt-get update && apt-get install -y \
+    make \
+    gcc
+
+RUN wget -O jhead-${JHEAD_VERSION}.tar.gz https://www.sentex.net/~mwandel/jhead/jhead-${JHEAD_VERSION}.tar.gz
+RUN tar -xvzf jhead-${JHEAD_VERSION}.tar.gz
+WORKDIR /jhead-${JHEAD_VERSION}
+RUN make
+RUN cp jhead /usr/local/bin/
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | OPTIPNG
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+FROM base_debian AS optipng
+
+ARG OPTIPNG_VERSION
+
+RUN apt-get update && apt-get install -y \
+    make \
+    gcc \
+    libpng-dev \
+    zlib1g-dev
+
+RUN wget -O optipng-${OPTIPNG_VERSION}.tar.gz https://downloads.sourceforge.net/optipng/optipng-${OPTIPNG_VERSION}.tar.gz
+RUN tar -xvzf optipng-${OPTIPNG_VERSION}.tar.gz
+WORKDIR /optipng-${OPTIPNG_VERSION}
+RUN ./configure
+RUN make
+RUN make install
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# STAGE | PNGCRUSH
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+FROM base_debian AS pngcrush
+
+ARG PNGCRUSH_VERSION
+
+RUN apt-get update && apt-get install -y \
+    make \
+    gcc \
+    zlib1g-dev
+
+RUN wget -O pngcrush-${PNGCRUSH_VERSION}.tar.gz https://downloads.sourceforge.net/pmt/pngcrush-${PNGCRUSH_VERSION}.tar.gz
+RUN tar -xvzf pngcrush-${PNGCRUSH_VERSION}.tar.gz
+WORKDIR /pngcrush-${PNGCRUSH_VERSION}
+RUN make
+RUN cp pngcrush /usr/local/bin/
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | MAIN
@@ -218,6 +309,10 @@ COPY --from=advancecomp   /usr/local/bin/advpng          /usr/bin
 COPY --from=oxipng        /usr/local/bin/oxipng          /usr/bin
 COPY --from=pngquant      /usr/local/bin/pngquant        /usr/bin
 COPY --from=pngout-static /usr/local/bin/pngout          /usr/bin
+COPY --from=gifsicle      /usr/local/bin/gifsicle        /usr/bin
+COPY --from=jhead         /usr/local/bin/jhead           /usr/bin
+COPY --from=optipng       /usr/local/bin/optipng         /usr/bin
+COPY --from=pngcrush      /usr/local/bin/pngcrush        /usr/bin
 
 COPY --from=jpegarchive  /usr/local/bin/jpeg-recompress  /usr/bin
 
@@ -277,11 +372,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Shell
     bash \
     # Image processing tools
-    gifsicle \
-    jhead \
-    optipng \
-    pngcrush \
-    jpegoptim \
+    # gifsicle \
+    # jhead \
+    # optipng \
+    # pngcrush \
+    # jpegoptim \
     # Image processing libraries
     libjpeg-dev \
     libpng-dev \
