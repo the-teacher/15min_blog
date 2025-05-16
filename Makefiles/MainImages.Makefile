@@ -90,3 +90,22 @@ clean-main-images:
 	@echo "Removing tagged images..."
 	-docker rmi $(MAIN_IMAGE_NAME):arm64 $(MAIN_IMAGE_NAME):amd64 $(MAIN_IMAGE_NAME):latest
 	@echo "Main images cleanup completed!" 
+
+# Help for main image building commands
+help-main-image:
+	@echo "=============================================================="
+	@echo "Main image building commands:"
+	@echo "=============================================================="
+	@echo "  make build-main-arm64     - Build main image for ARM64"
+	@echo "  make build-main-amd64     - Build main image for AMD64"
+	@echo "  make build-main-all       - Build main image for all platforms"
+	@echo "  make create-main-manifest - Create manifest for main image"
+	@echo "  make push-main-images     - Push main images to Docker Hub"
+	@echo "  make push-main-manifest   - Push manifest to Docker Hub"
+	@echo "  make update-main-images   - Build, push images and manifest"
+	@echo "  make shell-main-arm64     - Enter shell of main ARM64 image"
+	@echo "  make shell-main-amd64     - Enter shell of main AMD64 image"
+	@echo "  make run-rails-app-arm64  - Run Rails app in ARM64 container"
+	@echo "  make run-rails-app-amd64  - Run Rails app in AMD64 container"
+	@echo "  make clean-main-images    - Remove all main project images"
+	@echo "=============================================================="

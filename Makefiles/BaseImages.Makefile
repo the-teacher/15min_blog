@@ -122,3 +122,22 @@ show-all-images:
 	@echo "=============================================================="
 	@docker images
 	@echo "=============================================================="
+
+# Help for base image building commands
+help-base-image:
+	@echo "=============================================================="
+	@echo "Base image building commands:"
+	@echo "=============================================================="
+	@echo "  make build-base-arm64        - Build base image for ARM64"
+	@echo "  make build-base-amd64        - Build base image for AMD64"
+	@echo "  make build-base-all          - Build base image for all platforms"
+	@echo "  make create-base-manifest    - Create manifest for base image"
+	@echo "  make push-base-images        - Push base images to Docker Hub"
+	@echo "  make push-base-manifest      - Push manifest to Docker Hub"
+	@echo "  make update-base-images      - Build, push images and manifest"
+	@echo "  make shell-base-arm64        - Enter shell of base ARM64 image as rails user"
+	@echo "  make shell-base-amd64        - Enter shell of base AMD64 image as rails user"
+	@echo "  make shell-base-arm64-root   - Enter shell of base ARM64 image as root user"
+	@echo "  make shell-base-amd64-root   - Enter shell of base AMD64 image as root user"
+	@echo "  make clean-base-images       - Remove all base project images"
+	@echo "=============================================================="
