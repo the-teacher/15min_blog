@@ -15,6 +15,13 @@
 # Ruby version to use
 ARG RUBY_VERSION=3.4.3-bookworm
 
+# https://nodejs.org/en/download
+ARG NODE_VERSION=22.15.0
+# https://www.npmjs.com/package/npm
+ARG NPM_VERSION=11.3.0
+# https://github.com/nvm-sh/nvm/releases
+ARG NVM_VERSION=0.40.3
+
 # https://github.com/shssoichiro/oxipng/releases
 ARG OXIPNG_VERSION=9.1.5
 # https://www.ijg.org/files
@@ -23,11 +30,6 @@ ARG JPEG_VERSION=9f
 ARG MOZJPEG_VERSION=4.1.1
 # https://github.com/danielgtaylor/jpeg-archive/releases
 ARG JPEGARCHIVE_VERSION=2.2.0
-
-# https://pngquant.org/releases.html
-# https://raw.githubusercontent.com/kornelski/pngquant/main/CHANGELOG
-# ARG PNGQUANT_VERSION=2.18.0
-
 # http://www.jonof.id.au/kenutils
 ARG PNGOUT_VERSION=20200115
 # https://github.com/amadvance/advancecomp/releases
@@ -38,12 +40,6 @@ ARG JPEGOPTIM_VERSION=1.5.5
 ARG WEBP_VERSION=1.5.0
 # https://github.com/ImageMagick/ImageMagick/releases
 ARG IMAGEMAGICK_VERSION=7.1.1-28
-# https://nodejs.org/en/download
-ARG NODE_VERSION=22.15.0
-# https://www.npmjs.com/package/npm
-ARG NPM_VERSION=11.3.0
-# https://github.com/nvm-sh/nvm/releases
-ARG NVM_VERSION=0.40.3
 # https://www.lcdf.org/gifsicle/
 ARG GIFSICLE_VERSION=1.96
 # https://www.sentex.net/~mwandel/jhead/
@@ -53,22 +49,9 @@ ARG OPTIPNG_VERSION=0.7.8
 # https://pmt.sourceforge.net/pngcrush/
 ARG PNGCRUSH_VERSION=1.8.13
 
-# Expects versions not later than:
-#
-# svgo - 3.3.2
-# cwebp - 1.5.0
-# jpeg-recompress - 2.2.0
-# jpegoptim - 1.5.5
-# jpegtran - 2.1.5 (build 20230203)
-# jhead - 3.06
-# advpng - 2.6
-# oxipng - 9.1.5
-# optipng - 0.7.7
-# pngquant - 3.0.3
-# pngcrush - 1.8.13
-# pngout - 20200115
-# gifsicle - 1.93
-# ImageMagick - 7.1.1-28
+# https://pngquant.org/releases.html
+# https://raw.githubusercontent.com/kornelski/pngquant/main/CHANGELOG
+# ARG PNGQUANT_VERSION=2.18.0
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # STAGE | BASE DEBIAN
