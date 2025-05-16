@@ -220,7 +220,8 @@ RUN apt-get update && apt-get install -y \
     automake \
     libtool \
     make \
-    gcc
+    gcc \
+    libgif-dev
 
 RUN wget -O gifsicle-${GIFSICLE_VERSION}.tar.gz https://www.lcdf.org/gifsicle/gifsicle-${GIFSICLE_VERSION}.tar.gz
 RUN tar -xvzf gifsicle-${GIFSICLE_VERSION}.tar.gz
@@ -274,7 +275,8 @@ ARG PNGCRUSH_VERSION
 RUN apt-get update && apt-get install -y \
     make \
     gcc \
-    zlib1g-dev
+    zlib1g-dev \
+    libpng-dev
 
 RUN wget -O pngcrush-${PNGCRUSH_VERSION}.tar.gz https://downloads.sourceforge.net/pmt/pngcrush-${PNGCRUSH_VERSION}.tar.gz
 RUN tar -xvzf pngcrush-${PNGCRUSH_VERSION}.tar.gz
@@ -343,19 +345,6 @@ COPY --from=imagemagick /usr/local/etc/ImageMagick-7/ /usr/local/etc/ImageMagick
 # Shell:
 #   - bash: Bourne Again SHell
 #
-# Image processing tools:
-#   - gifsicle: Command-line tool for manipulating GIF images
-#   - jhead: Tool for manipulating JPEG EXIF data
-#   - optipng: PNG optimizer that recompresses images
-#   - pngcrush: PNG compression and optimization utility
-#   - jpegoptim: Utility to optimize JPEG files
-#
-# Image processing libraries:
-#   - libjpeg-dev: JPEG library development files
-#   - libpng-dev: PNG library development files
-#   - libtiff-dev: TIFF library development files
-#   - libgif-dev: GIF library development files
-#
 # System tools:
 #   - cron: Process scheduling daemon
 #   - vim: Improved vi text editor
@@ -371,29 +360,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     telnet \
     # Shell
     bash \
-    # Image processing tools
-    # gifsicle \
-    # jhead \
-    # optipng \
-    # pngcrush \
-    # jpegoptim \
-    # Image processing libraries
-    libjpeg-dev \
-    libpng-dev \
-    libtiff-dev \
-    libgif-dev \
-    # ImageMagick dependencies
-    libheif-dev \
-    libopenjp2-7-dev \
-    libx11-dev \
-    libxext-dev \
-    zlib1g-dev \
-    liblcms2-dev \
-    libfontconfig1-dev \
-    libfreetype6-dev \
-    libxml2-dev \
-    libltdl7-dev \
-    ghostscript \
     # System tools
     cron \
     vim \
@@ -452,7 +418,6 @@ RUN . "$NVM_DIR/nvm.sh" && nvm use ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && npm install -g npm@${NPM_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && npm install -g yarn@latest
 RUN . "$NVM_DIR/nvm.sh" && npm install -g svgo
-
 
 # Add NVM binaries to PATH
 ENV PATH="/opt/.nvm/versions/node/v${NODE_VERSION}/bin:${PATH}"
