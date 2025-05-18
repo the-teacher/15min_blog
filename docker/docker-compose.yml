@@ -1,13 +1,21 @@
-name: ruby_app
+name: blog_15min
 
 services:
-  ruby_app:
+  rails_app:
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
     tty: true
     stdin_open: true
+
+    environment:
+      - RAILS_ENV=development
+      - BUNDLE_PATH=/usr/local/bundle
+
     volumes:
       - ../:/app
+      - ../blog_15min/tmp/bundle:/usr/local/bundle
+      - ../blog_15min/tmp/node_modules:/app/node_modules
+
     working_dir: /app
-    command: ["sleep", "infinity"]
+    command: sleep infinity
