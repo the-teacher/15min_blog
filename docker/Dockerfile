@@ -12,8 +12,11 @@ ENV RUBYOPT="--yjit"
 # Rails user is already created in the base image and has access to the /app directory
 USER rails:rails
 
+# Update gem system to the latest version
+RUN gem update --system 3.6.8
+
 # Installing required gems for the blog
 RUN gem install rails
 
 # Default command
-CMD ["bash"] 
+CMD ["bash"]
