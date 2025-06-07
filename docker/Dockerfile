@@ -9,6 +9,10 @@ WORKDIR /app
 ENV RUBY_YJIT_ENABLE=1
 ENV RUBYOPT="--yjit"
 
+# Install sqlite3
+USER root
+RUN apt-get update && apt-get install -y sqlite3
+
 # Rails user is already created in the base image and has access to the /app directory
 USER rails:rails
 
