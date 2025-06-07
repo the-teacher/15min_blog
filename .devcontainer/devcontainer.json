@@ -1,9 +1,10 @@
 {
   "name": "Rails Development",
+
+  "service": "rails_app",
   "dockerComposeFile": "../docker/docker-compose.yml",
   "workspaceFolder": "/app",
-  "service": "rails_app",
-  "forwardPorts": [3000],
+
   "customizations": {
     "vscode": {
       "settings": {
@@ -38,6 +39,7 @@
       ]
     }
   },
-  // "postCreateCommand": "bundle install",
+
   "remoteUser": "rails"
+  // "postCreateCommand": "bundle install",
 }
