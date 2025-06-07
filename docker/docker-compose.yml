@@ -12,6 +12,9 @@ services:
     environment:
       - RAILS_ENV=development
       - BUNDLE_PATH=/usr/local/bundle
+      - HISTFILE=/home/rails/blog_15min/tmp/.bash_history
+      - HISTSIZE=10000
+      - SAVEHIST=10000
 
     ports:
       - "3000:3000"
@@ -20,6 +23,7 @@ services:
       - ../:/app
       - ../blog_15min/tmp/bundle:/usr/local/bundle
       - ../blog_15min/tmp/node_modules:/app/blog_15min/node_modules
+      - ../blog_15min/tmp/.bash_history:/home/rails/blog_15min/tmp/.bash_history
 
     working_dir: /app/blog_15min
     command: sleep infinity

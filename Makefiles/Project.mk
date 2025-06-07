@@ -3,6 +3,7 @@ COMPOSE_FILE := ./docker/docker-compose.yml
 
 # Start containers
 start:
+	make setup-project-structure
 	docker compose -f $(COMPOSE_FILE) up -d
 
 # Start containers
@@ -33,3 +34,6 @@ rebuild:
 # Open shell in rails_app container
 shell:
 	docker compose -f $(COMPOSE_FILE) exec rails_app bash
+
+setup-project-structure:
+	touch blog_15min/tmp/.bash_history

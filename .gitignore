@@ -49,3 +49,4 @@
 # Docker
 .dockerignore
 docker-compose.override.yml
+blog_15min/tmp/.bash_history
