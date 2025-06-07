@@ -1,16 +1,30 @@
 include Makefiles/BaseImages.mk
 include Makefiles/MainImages.mk
+include Makefiles/Project.mk
+include Makefiles/Rails.mk
 
 # Main help command
 help:
 	@echo "15min_blog - Available commands:"
 	@echo "=============================================================="
-	@echo "Image building and management:"
-	@echo "  make help-image-build     - Show general image building commands"
-	@echo "  make help-base-image      - Show base image building commands"
-	@echo "  make help-main-image      - Show main image building commands"
+	@echo "Project management:"
+	@echo "  make start               - Start all containers"
+	@echo "  make stop                - Stop all containers"
+	@echo "  make status              - Show running containers status"
+	@echo "  make build               - Build or rebuild containers"
+	@echo "  make rebuild             - Rebuild containers"
+	@echo "  make shell               - Open shell in rails_app container"
 	@echo "=============================================================="
-	@echo "More categories will be added in the future"
+	@echo "Rails commands:"
+	@echo "  make rails-start         - Start Rails server with all dependencies"
+	@echo "  make rails-bundle        - Install Ruby dependencies"
+	@echo "  make rails-db-create     - Create database"
+	@echo "  make rails-db-migrate    - Run database migrations"
+	@echo "  make rails-db-seed       - Seed the database"
+	@echo "=============================================================="
+	@echo "Docker images (see 'make help-image-build' for more):"
+	@echo "  make help-base-image     - Show base image building commands"
+	@echo "  make help-main-image     - Show main image building commands"
 	@echo "=============================================================="
 
 # Help for general image building commands

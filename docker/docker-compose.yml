@@ -5,6 +5,7 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
+
     tty: true
     stdin_open: true
 
@@ -12,10 +13,13 @@ services:
       - RAILS_ENV=development
       - BUNDLE_PATH=/usr/local/bundle
 
+    ports:
+      - "3000:3000"
+
     volumes:
       - ../:/app
       - ../blog_15min/tmp/bundle:/usr/local/bundle
-      - ../blog_15min/tmp/node_modules:/app/node_modules
+      - ../blog_15min/tmp/node_modules:/app/blog_15min/node_modules
 
-    working_dir: /app
+    working_dir: /app/blog_15min
     command: sleep infinity
