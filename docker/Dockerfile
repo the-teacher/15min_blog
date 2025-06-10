@@ -22,5 +22,7 @@ RUN gem update --system 3.6.8
 # Installing required gems for the blog
 RUN gem install rails
 
+WORKDIR /app/blog_15min
+
 # Default command
 CMD ["bash"]

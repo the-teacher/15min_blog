@@ -450,4 +450,4 @@ RUN chown rails:rails /home/rails/ruby-env.sh
 
 # Switch to rails user
 USER rails:rails
-WORKDIR /app
+WORKDIR /app/blog_15min
