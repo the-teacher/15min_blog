@@ -2,6 +2,7 @@ include Makefiles/BaseImages.mk
 include Makefiles/MainImages.mk
 include Makefiles/Project.mk
 include Makefiles/Rails.mk
+include Makefiles/production-rails.mk
 
 # Main help command
 help:
@@ -21,6 +22,15 @@ help:
 	@echo "  make rails-db-create     - Create database"
 	@echo "  make rails-db-migrate    - Run database migrations"
 	@echo "  make rails-db-seed       - Seed the database"
+	@echo "=============================================================="
+	@echo "Production Rails commands:"
+	@echo "  make production-rails-start    - Full production startup sequence"
+	@echo "  make production-rails-server   - Start Rails server in production mode"
+	@echo "  make production-rails-bundle   - Install production dependencies"
+	@echo "  make production-rails-assets   - Precompile assets for production"
+	@echo "  make production-rails-db-setup - Setup production database"
+	@echo "  make production-rails-console  - Open production Rails console"
+	@echo "  make production-rails-logs     - View production logs"
 	@echo "=============================================================="
 	@echo "Docker images (see 'make help-image-build' for more):"
 	@echo "  make help-base-image     - Show base image building commands"
