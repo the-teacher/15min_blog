@@ -17,6 +17,12 @@ rails-db-migrate:
 rails-db-seed:
 	docker compose -f $(COMPOSE_FILE) exec rails_app bash -c "bundle exec rails db:seed"
 
+# Show running processes inside Rails container
+rails-status:
+	@echo "Rails container processes:"
+	@echo "=============================================================="
+	docker compose -f $(COMPOSE_FILE) exec rails_app bash -c "ps aux"
+
 # Start containers
 rails-start:
 	make rails-bundle
@@ -34,5 +40,6 @@ help-rails:
 	@echo "  make rails-db-create     - Create database"
 	@echo "  make rails-db-migrate    - Run database migrations"
 	@echo "  make rails-db-seed       - Seed the database"
+	@echo "  make rails-status        - Show running processes inside Rails container"
 	@echo "=============================================================="
 
