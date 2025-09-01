@@ -2,7 +2,7 @@ include Makefiles/BaseImages.mk
 include Makefiles/MainImages.mk
 include Makefiles/Project.mk
 include Makefiles/Rails.mk
-include Makefiles/production-rails.mk
+include Makefiles/Production-rails.mk
 
 # Main help command
 help:
