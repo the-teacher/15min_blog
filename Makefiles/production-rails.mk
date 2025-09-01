@@ -67,3 +67,22 @@ production-rails-console:
 # Production bash access
 production-rails-bash:
 	docker compose -f $(COMPOSE_FILE) exec -e RAILS_ENV=production rails_app bash
+
+# Help for Production Rails commands
+help-production-rails:
+	@echo "=============================================================="
+	@echo "Production Rails commands:"
+	@echo "=============================================================="
+	@echo "  make production-rails-start    - Full production startup sequence"
+	@echo "  make production-rails-server   - Start Rails server in production mode"
+	@echo "  make production-rails-bundle   - Install production dependencies"
+	@echo "  make production-rails-assets   - Precompile assets for production"
+	@echo "  make production-rails-db-setup - Setup production database"
+	@echo "  make production-rails-console  - Open production Rails console"
+	@echo "  make production-rails-logs     - View production logs"
+	@echo "  make production-rails-up       - Start production containers in detached mode"
+	@echo "  make production-rails-down     - Stop production containers"
+	@echo "  make production-rails-restart  - Restart production containers"
+	@echo "  make production-rails-bash     - Access bash in production environment"
+	@echo "  make production-rails-clean    - Clean production assets"
+	@echo "=============================================================="

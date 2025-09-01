@@ -24,3 +24,15 @@ rails-start:
 	make rails-db-migrate
 	docker compose -f $(COMPOSE_FILE) exec rails_app bash -c "bundle exec rails s -b 0.0.0.0 -p 3000"
 
+# Help for Rails commands
+help-rails:
+	@echo "=============================================================="
+	@echo "Rails development commands:"
+	@echo "=============================================================="
+	@echo "  make rails-start         - Start Rails server with all dependencies"
+	@echo "  make rails-bundle        - Install Ruby dependencies"
+	@echo "  make rails-db-create     - Create database"
+	@echo "  make rails-db-migrate    - Run database migrations"
+	@echo "  make rails-db-seed       - Seed the database"
+	@echo "=============================================================="
+
